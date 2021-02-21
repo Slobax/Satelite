@@ -1,0 +1,50 @@
+#/bin/sh
+
+DAEMON=/home/root/gdrive-mount.sh
+NAME=gdrive-mount
+DESC="Script para montar el disco gdrive"
+RUTA=/mnt/gdrive
+MONTAJE=$(mount | grep ${RUTA} | wc -l)
+test -f $DAEMON || exit 0
+
+case "$1" in
+    start)
+        echo -n "* starting $DESC: $NAME... "
+        if [ "$MONTAJE" -eq 0 ];
+        then
+           $DAEMON &
+           sleep 2
+           echo "done."
+        else
+           echo "No se puede montar porque ya esta montado"
+        fi
+        ;;
+    stop)
+        echo -n "* stopping $DESC: $NAME... "
+        if [ "$MONTAJE" -gt 0 ];
+        then
+           umount $RUTA
+           sleep 2
+           echo "done."
+        fi
+        ;;
+    restart)
+        echo "* restarting $DESC: $NAME... "
+        $0 stop || true
+        $0 start
+        echo "done."
+        ;;
+    status)
+        if [ "$MONTAJE" -gt 0 ]
+        then
+           echo "GDrive montado correctamente"
+        else
+           echo "GDrive no esta montado correctamente"
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+exit 0
